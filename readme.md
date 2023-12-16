@@ -1,6 +1,8 @@
 # MyGarm API - Hacktiv8 Final Project 2
 
-The API is documented using Swagger. You can access the API documentation by starting the server and visiting `http://localhost:8080/swagger/index.html` in your web browser.
+The API is documented using Swagger. You can access the API documentation by starting the server and visiting `http://localhost:8888/swagger/index.html` in your web browser.
+
+**Live Deployment:** [MyGarm API - Final Project 2](https://finalproject2-kel2-go-production.up.railway.app/)
 
 ## Features
 
