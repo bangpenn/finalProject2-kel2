@@ -4,6 +4,13 @@ The API is documented using Swagger. You can access the API documentation by sta
 
 **Live Deployment:** [MyGarm API - Final Project 2](https://finalproject2-kel2-go-production.up.railway.app/)
 
+## Group 2
+
+- Efendi
+- Rizal
+- Novita
+- Moh. Ihsan
+
 ## Features
 
 - Create a new user.
