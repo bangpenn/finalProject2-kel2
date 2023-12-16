@@ -20,11 +20,11 @@ type database struct {
 func Get() *config {
 	cfg := &config{
 		Database: database{
-			Host:     "localhost", // Ganti dengan nilai yang sesuai
-			Port:     "5432",      // Ganti dengan nilai yang sesuai
+			Host:     "roundhouse.proxy.rlwy.net", // Ganti dengan nilai yang sesuai
+			Port:     "39483",      // Ganti dengan nilai yang sesuai
 			User:     "postgres",  // Ganti dengan nilai yang sesuai
-			Password: "1234",      // Ganti dengan nilai yang sesuai
-			Name:     "fp2",       // Ganti dengan nilai yang sesuai
+			Password: "3Bd-4EGgcb-4b-5CbbDfd2g-AB5CggA-",      // Ganti dengan nilai yang sesuai
+			Name:     "railway",       // Ganti dengan nilai yang sesuai
 		},
 	}
 
