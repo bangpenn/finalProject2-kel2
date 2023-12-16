@@ -1,0 +1,116 @@
+package server
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/novita/finalproject2-revisi/handler"
+	"github.com/novita/finalproject2-revisi/infrastructure/database"
+	"github.com/novita/finalproject2-revisi/middleware"
+	"github.com/novita/finalproject2-revisi/repository"
+	"github.com/novita/finalproject2-revisi/service"
+)
+
+func Run() {
+	server := Init()
+	server.Run()
+}
+
+func Init() *gin.Engine {
+	r := gin.Default()
+
+	// Middleware
+	r.Use(middleware.ErrorHandler())
+
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "success",
+			"message": "Welcome to MyGram API",
+		})
+	})
+
+	r.GET("/auth", middleware.Authentication(), func(c *gin.Context) {
+		header := c.MustGet("user").(map[string]interface{})
+		id := header["id"]
+
+		c.JSON(200, gin.H{
+			"status": "success",
+			"header": header,
+			"id":     id,
+		})
+	})
+
+	db := database.GetInstance()
+
+	// Users
+	usersRepo := repository.NewUsers(db)
+	usersService := service.NewUsers(usersRepo)
+	usersHandler := handler.NewUsers(usersService)
+
+	// Photos
+	photosRepo := repository.NewPhotos(db)
+	photosService := service.NewPhotos(photosRepo)
+	photosHandler := handler.NewPhotos(photosService, usersService)
+
+	// Comments
+	commentsRepo := repository.NewComments(db)
+	commentsService := service.NewComments(commentsRepo)
+	commentsHandler := handler.NewComments(commentsService, photosService, usersService)
+
+	// Social Medias
+	socialMediasRepo := repository.NewSocialMedias(db)
+	socialMediasService := service.NewSocialMedias(socialMediasRepo)
+	socialMediasHandler := handler.NewSocialMedias(socialMediasService, usersService)
+
+	// Authorization
+	authService := service.NewAuthorization(photosRepo, commentsRepo, socialMediasRepo)
+
+	// Routes
+	usersRouter := r.Group("/users")
+	{
+		usersRouter.POST("/register", usersHandler.Register)
+		usersRouter.POST("/login", usersHandler.Login)
+		usersRouter.PUT("/", middleware.Authentication(), usersHandler.Update)
+		usersRouter.DELETE("/", middleware.Authentication(), usersHandler.Delete)
+	}
+
+	photosRouter := r.Group("/photos").Use(middleware.Authentication())
+	{
+		photosRouter.POST("/", photosHandler.Add)
+		photosRouter.GET("/", photosHandler.GetAll)
+		photosRouter.PUT(
+			"/:photoId",
+			authService.PhotoAuthorization(),
+			photosHandler.Update,
+		)
+		photosRouter.DELETE(
+			"/:photoId",
+			authService.PhotoAuthorization(),
+			photosHandler.Delete,
+		)
+	}
+
+	commentsRouter := r.Group("/comments").Use(middleware.Authentication())
+	{
+		commentsRouter.POST("/", commentsHandler.Add)
+		commentsRouter.GET("/", commentsHandler.GetAll)
+		commentsRouter.PUT(
+			"/:commentId",
+			authService.CommentAuthorization(),
+			commentsHandler.Update,
+		)
+		commentsRouter.DELETE(
+			"/:commentId",
+			authService.CommentAuthorization(),
+			commentsHandler.Delete,
+		)
+	}
+
+	socialMediasRouter := r.Group("/socialmedias").Use(middleware.Authentication())
+	{
+		socialMediasRouter.POST("/", socialMediasHandler.Add)
+		socialMediasRouter.GET("/", socialMediasHandler.GetAll)
+		socialMediasRouter.PUT("/:socialMediaId", authService.SocialMediaAuthorization(), socialMediasHandler.Update)
+		socialMediasRouter.DELETE("/:socialMediaId", authService.SocialMediaAuthorization(), socialMediasHandler.Delete)
+	}
+
+	return r
+}
